@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualizeMaster: Enhance Your Visualization Skills</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* This will hide the scrollbar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: white; /* Changed background color to white */
+            font-family: Calibri, Arial, sans-serif; /* Changed font to Calibri */
+            text-align: center;
+        }
+        .container {
+            font-size: 100vmin; /* Increased font size */
+            color: black; /* Changed text color to black */
+            cursor: pointer;
+            font-weight: bold; /* Make text bold */
+        }
+        .jiggle {
+            animation: jiggling 0.2s ease-in-out;
+        }
+        @keyframes jiggling {
+            0%, 100% {
+                transform: rotate(-2deg);
+            }
+            50% {
+                transform: rotate(2deg);
+            }
+        }
+        .prescreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .button {
+            padding: 1em 2em;
+            margin: 1em;
+            font-size: 1.5em;
+            cursor: pointer;
+            border: none;
+            background-color: black;
+            color: white;
+            border-radius: 5px;
+            font-weight: bold; /* Make button text bold */
+            width: 200px;
+        }
+        .intro-text {
+            margin-bottom: 30px;
+            width: 80%; /* Reduce text width */
+            margin-top: 50px; /* Add space above */
+        }
+        .intro-text p {
+            margin-top: 20px; /* Add space between paragraphs */
+        }
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 600px; /* Limit width for centering */
+        }
+        .shape-container {
+            width: 100vmin;
+            height: 100vmin;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .shape {
+            width: 70vmin; /* Standard size for shapes */
+            height: 70vmin;
+        }
+        @media (max-width: 600px) {
+            .button {
+                padding: 0.8em 1.5em;
+                margin: 0.8em;
+                font-size: 1.2em;
+                width: auto;
+            }
+            .container {
+                font-size: 50vmin; /* Adjust font size for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="prescreen" id="prescreen">
+        <div class="intro-text">
+            <h1>VisualizeMaster: Enhance Your Visualization Skills</h1>
+            <p>Welcome to <strong>VisualizeMaster</strong>! This application is inspired by the groundbreaking work of Makoto Shishida, who suggests that by engaging with afterimages, you can significantly improve your visualization capabilities. This exercise is particularly beneficial for individuals aiming to overcome aphantasia or enhance their remote viewing skills.</p>
+            <p>By practicing with various visual stimuli, such as numbers, letters, words, and shapes, you can train your brain to retain and summon images more effectively. This method promotes better communication between the left and right hemispheres of the brain, fostering enhanced visual and cognitive abilities.</p>
+            <p>Get ready to embark on a journey to improve your mental imagery and visualization skills with <strong>VisualizeMaster</strong>!</p>
+        </div>
+        <div class="buttons-container">
+            <button class="button" onclick="startTraining('numbers')">Numbers Only</button>
+            <button class="button" onclick="startTraining('letters')">Letters Only</button>
+            <button class="button" onclick="startTraining('shapes')">Shapes</button>
+            <button class="button" onclick="startTraining('decision')">Decision</button>
+            <button class="button" onclick="startTraining('3letterwords')">3-Letter Words</button>
+            <button class="button" onclick="startTraining('5letterwords')">5-Letter Words</button>
+        </div>
+    </div>
+    <div class="container" id="container" style="display: none;"></div>
+
+    <script>
+        let currentCharacter;
+        let firstClick = false;
+        let mode;
+
+        // Create a Web Audio Context
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let gainNode = audioContext.createGain(); // Create a GainNode
+
+        // Connect the GainNode to the destination (speakers)
+        gainNode.connect(audioContext.destination);
+
+        function getRandomCharacter(previousCharacter) {
+            const characters = mode === 'numbers' ? '0123456789' :
+                               mode === 'letters' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' :
+                               mode === '3letterwords' ? ['CAT', 'DOG', 'BAT', 'HAT', 'RAT', 'MAT', 'PAT', 'SAT', 'TAP', 'MAP', 'BAG', 'CAR', 'JAR', 'BAR', 'FAN', 'PAN', 'CAN', 'MAN', 'VAN', 'RAN', 'BOX', 'FOX', 'SIX', 'FIX', 'MIX', 'WAX', 'TAX', 'SAX', 'MAX', 'FAX', 'BED', 'RED', 'LED', 'FED', 'TED', 'WED', 'MED', 'NOD', 'GOD', 'POD', 'BEE', 'SEE', 'TEE', 'FEE', 'LEE', 'WEE', 'HIT', 'FIT', 'BIT', 'SIT', 'LIT', 'KIT', 'PIT', 'BIG', 'DIG', 'FIG', 'WIG', 'JIG', 'RIG', 'HUG', 'BUG', 'MUG', 'RUG', 'TUG', 'JAM', 'HAM', 'RAM', 'DAM', 'LAM', 'SAM', 'GAP', 'NAP', 'SAP', 'TAP', 'LAP', 'CAP', 'ZAP', 'YAP', 'JAW', 'SAW', 'LAW', 'PAW', 'RAW', 'DAW', 'MAW', 'COG', 'DOG', 'FOG', 'LOG', 'BOG', 'HOG', 'MOB', 'JOB', 'NOB', 'ROB', 'SOB', 'BOY', 'TOY', 'JOY', 'COY', 'SOY', 'BUN', 'FUN', 'RUN', 'SUN', 'GUN', 'NUN', 'PUN', 'TIN', 'PIN', 'SIN', 'FIN', 'KIN', 'DIN', 'WIN', 'INN', 'OWN', 'COW', 'BOW', 'HOW', 'NOW', 'ROW', 'SOW', 'LOW', 'WOW', 'NEW', 'FEW', 'SEW', 'PEW', 'HEW', 'MEN', 'TEN', 'PEN', 'DEN', 'HEN', 'KEN', 'ZEN', 'ONE', 'TWO', 'WHO', 'WHY', 'TRY', 'FRY', 'DRY', 'CRY', 'SKY', 'FLY', 'SPY', 'BYE', 'MYE', 'DIE', 'LIE', 'PIE', 'TIE', 'VIE', 'FIE', 'RUE', 'DUE', 'CUE', 'HUE', 'SUE', 'RYE', 'EYE', 'GEL', 'BEL', 'CEL', 'DEL', 'FEL', 'HEL', 'JEL', 'KEL', 'MEL', 'PEL', 'REL', 'TEL', 'VEL', 'WEL', 'YES', 'NO', 'MAY', 'BOX', 'FOX', 'VEX', 'SEX', 'WAX', 'TAX', 'SAX', 'ZOO', 'FOE', 'DOE'] :
+                               mode === '5letterwords' ? ['APPLE', 'GRAPE', 'PLANE', 'CRANE', 'SHARE', 'STONE', 'SWEET', 'TREES', 'CANDY', 'BLANK', 'HEART', 'LIGHT', 'SOUND', 'EARTH', 'WATER', 'HOUSE', 'MOUSE', 'HAPPY', 'SMILE', 'GREEN', 'BLACK', 'WHITE', 'BROWN', 'ALPHA', 'BRAVE', 'CRISP', 'DREAM', 'EAGLE', 'FAITH', 'GIANT', 'HOUSE', 'IMAGE', 'JOLLY', 'KNACK', 'LEMON', 'MANGO', 'NIGHT', 'OCEAN', 'PEARL', 'QUICK', 'RIVER', 'SHINE', 'TIGER', 'UNITY', 'VOICE', 'WORTH', 'XENON', 'YEARN', 'ZEBRA', 'ANGEL', 'BEACH', 'CHAIR', 'DANCE', 'ELOPE', 'FRUIT', 'GLOBE', 'HONEY', 'IVORY', 'JUDGE', 'KNEEL', 'LEARN', 'MARCH', 'NOBLE', 'OPERA', 'PAINT', 'QUEEN', 'ROBIN', 'SAINT', 'TOWER', 'UPPER', 'VOTER', 'WINDY', 'XERON', 'YOUNG', 'ZEBRA', 'ACORN', 'BASIS', 'CIVIL', 'DRESS', 'EIGHT', 'FLOOD', 'GUILD', 'HORSE', 'INNER', 'JOKER', 'KNIFE', 'LOWER', 'MIGHT', 'NURSE', 'OUTER', 'PAPER', 'QUILT', 'RIGHT', 'SWEET', 'THUMB', 'UNDER', 'VISIT', 'WITCH', 'XENIA', 'YIELD', 'ZONED'] :
+                               mode === 'decision' ? ['YES', 'NO', 'MAYBE'] :
+                               mode === 'shapes' ? ['circle', 'open_circle', 'square', 'open_square', 'triangle', 'open_triangle', 'rectangle', 'open_rectangle', 'oval', 'open_oval'] : [];
+            let newCharacter;
+            do {
+                newCharacter = Array.isArray(characters) ? characters[Math.floor(Math.random() * characters.length)] :
+                              characters.charAt(Math.floor(Math.random() * characters.length));
+            } while (newCharacter === previousCharacter);
+            return newCharacter;
+        }
+
+        function generateBipSound() {
+            let oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // Frequency of 440 Hz (A4)
+            oscillator.connect(gainNode); // Connect oscillator to GainNode instead of audioContext.destination
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1); // Sound duration of 0.1 seconds
+        }
+
+        function displayCharacter() {
+            const container = document.getElementById('container');
+            if (mode === 'shapes') {
+                container.innerHTML = getShapeSVG(currentCharacter);
+                container.style.fontSize = ''; // Reset font size
+            } else {
+                container.innerText = currentCharacter;
+                if (mode === '3letterwords' || mode === 'decision') {
+                    container.style.fontSize = '50vmin'; // Adjusted font size for 3-letter words and decision
+                } else if (mode === '5letterwords') {
+                    container.style.fontSize = '30vmin'; // Adjusted font size for 5-letter words
+                } else {
+                    container.style.fontSize = '100vmin'; // Default font size
+                }
+            }
+        }
+
+        function getShapeSVG(shape) {
+            const shapeSVGs = {
+                circle: '<svg class="shape" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="black" /></svg>',
+                open_circle: '<svg class="shape" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="black" stroke-width="10" /></svg>',
+                square: '<svg class="shape" viewBox="0 0 100 100"><rect x="0" y="0" width="100" height="100" fill="black" /></svg>',
+                open_square: '<svg class="shape" viewBox="0 0 100 100"><rect x="5" y="5" width="90" height="90" fill="none" stroke="black" stroke-width="10" /></svg>',
+                triangle: '<svg class="shape" viewBox="0 0 100 100"><polygon points="50,0 100,100 0,100" fill="black" /></svg>',
+                open_triangle: '<svg class="shape" viewBox="0 0 100 100"><polygon points="50,5 95,95 5,95" fill="none" stroke="black" stroke-width="10" /></svg>',
+                rectangle: '<svg class="shape" viewBox="0 0 200 100"><rect x="0" y="0" width="200" height="100" fill="black" /></svg>',
+                open_rectangle: '<svg class="shape" viewBox="0 0 200 100"><rect x="5" y="5" width="190" height="90" fill="none" stroke="black" stroke-width="10" /></svg>',
+                oval: '<svg class="shape" viewBox="0 0 200 100"><ellipse cx="100" cy="50" rx="100" ry="50" fill="black" /></svg>',
+                open_oval: '<svg class="shape" viewBox="0 0 200 100"><ellipse cx="100" cy="50" rx="95" ry="45" fill="none" stroke="black" stroke-width="10" /></svg>'
+            };
+            return shapeSVGs[shape] || '';
+        }
+
+        function speak(text) {
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'en-US';
+            speech.voice = speechSynthesis.getVoices().find(voice => voice.name.includes('Google UK English Female')) || null; // Select a female voice
+            window.speechSynthesis.speak(speech);
+        }
+
+        function handleClick() {
+            if (!firstClick) {
+                firstClick = true;
+                speak(currentCharacter.toString());
+            } else {
+                firstClick = false;
+                currentCharacter = getRandomCharacter(currentCharacter);
+                displayCharacter();
+                generateBipSound(); // Generate bip sound when a new round starts
+            }
+            const container = document.getElementById('container');
+            container.classList.add('jiggle');
+            setTimeout(() => {
+                container.classList.remove('jiggle');
+            }, 2000); // Jiggles for 2 seconds
+        }
+
+        function startTraining(selectedMode) {
+            mode = selectedMode;
+            currentCharacter = getRandomCharacter('');
+            document.getElementById('prescreen').style.display = 'none';
+            document.getElementById('container').style.display = 'flex';
+            displayCharacter();
+        }
+
+        // Adjust the gain value to control the volume of the bip sound
+        gainNode.gain.value = 0.1; // Lower value for lower volume
+
+        document.addEventListener('click', handleClick);
+
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                handleClick();
+            }
+        });
+    </script>
+</body>
+</html>
